@@ -8,8 +8,8 @@ function App() {
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    console.log(`count: ${count}`);
-  }, [count]);
+    console.log(`count: ${count} / input: ${input}`);
+  }, [count, input]);
 
   const onClickButton = (value) => {
     setCount(count + value);
@@ -19,7 +19,9 @@ function App() {
     <div className="App">
       <h1>Simple Counter</h1>
       <section>
-        <input />
+        <input value={input} onChange={(e)=>{
+          setInput(e.target.value)
+        }}/>
       </section>
       <section>
         <Viewer count={count} />
