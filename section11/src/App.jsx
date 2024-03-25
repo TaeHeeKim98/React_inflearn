@@ -2,8 +2,7 @@ import "./App.css";
 import Header from "./components/Header";
 import Editor from "./components/Editor";
 import List from "./components/List";
-import axios from "axios";
-import { useState, useRef, useReducer, useCallback, useEffect } from "react";
+import { useRef, useReducer, useCallback, createContext, useMemo } from "react";
 
 const mockData = [
   {
@@ -26,16 +25,6 @@ const mockData = [
   },
 ];
 
-// axios
-//   .get("http://localhost:3000/mockData")
-//   .then((res) => {
-//     //console.log(JSON.stringify(res.data));
-//     //mockData = JSON.stringify(res.data);
-//   })
-//   .catch((err) => {
-//     console.log("err");
-//   });
-
 const reducer = (state, action) => {
   switch (action.type) {
     case "CREATE":
@@ -51,21 +40,12 @@ const reducer = (state, action) => {
   }
 };
 
+export const TodoStateContext = createContext();
+export const TodoDispatchContext = createContext();
+
 function App() {
-  //const [mockData, setMockData] = useState(
-  //   axios.get("http://localhost:3000/mockData").then((rep) => {
-  //     console.log(JSON.stringify(rep.data));
-  //   })
-  // );
   const [todos, dispatch] = useReducer(reducer, mockData);
   const idRef = useRef(3);
-
-  // useEffect(() => {
-  //   axios.get("http://localhost:3000/mockData").then((rep) => {
-  //     console.log(JSON.stringify(rep.data));
-  //     setMockData(rep.data);
-  //   });
-  // }, []);
 
   console.log(JSON.stringify(mockData));
 
@@ -76,7 +56,7 @@ function App() {
         id: idRef.current++,
         isDone: false,
         content: content,
-        data: new Date().getTime(),
+        date: new Date().getTime(),
       },
     });
   }, []);
@@ -95,11 +75,19 @@ function App() {
     });
   }, []);
 
+  const memoizedDispach = useMemo(() => {
+    return { onCreate, onUpdate, onDelete };
+  }, []);
+
   return (
     <div className="App">
       <Header />
-      <Editor onCreate={onCreate} />
-      <List todos={todos} onUpdate={onUpdate} onDelete={onDelete} />
+      <TodoStateContext.Provider value={todos}>
+        <TodoDispatchContext.Provider value={memoizedDispach}>
+          <Editor />
+          <List />
+        </TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
     </div>
   );
 }
